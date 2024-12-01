@@ -1,4 +1,3 @@
-// imports
 import { Action } from "@/types"
 import { FFmpeg } from "@ffmpeg/ffmpeg"
 import { fetchFile } from "@ffmpeg/util"
@@ -95,24 +94,73 @@ function getFFmpegCommand(
   return ["-i", input, ...specificSettings, output]
 }
 
+export function isConversionSupported(from: string, to: string): boolean {
+  const rasterFormats = ["jpg", "jpeg", "png", "gif", "bmp", "tiff"]
+  const vectorFormats = ["svg"]
+  const audioFormats = ["mp3", "wav", "ogg", "aac", "flac", "m4a"]
+  const videoFormats = ["mp4", "avi", "mov", "webm"]
+
+  from = from.toLowerCase()
+  to = to.toLowerCase()
+
+  // Prevent conversion between raster and vector formats
+  if (
+    (rasterFormats.includes(from) && vectorFormats.includes(to)) ||
+    (vectorFormats.includes(from) && rasterFormats.includes(to))
+  ) {
+    return false
+  }
+
+  // Prevent conversion between audio/video and image formats
+  if (
+    (audioFormats.includes(from) &&
+      [...rasterFormats, ...vectorFormats].includes(to)) ||
+    ([...rasterFormats, ...vectorFormats].includes(from) &&
+      audioFormats.includes(to)) ||
+    (videoFormats.includes(from) &&
+      [...rasterFormats, ...vectorFormats, ...audioFormats].includes(to)) ||
+    ([...rasterFormats, ...vectorFormats, ...audioFormats].includes(from) &&
+      videoFormats.includes(to))
+  ) {
+    return false
+  }
+
+  return true
+}
+
 export default async function convert(ffmpeg: FFmpeg, action: Action) {
   const { file, to, file_name, file_type } = action
-  const input = getFileExtension(file_name)
+  const input = file_name
   const output = `${removeFileExtension(file_name)}.${to}`
 
-  // Write the input file to ffmpeg
-  ffmpeg.writeFile(input, await fetchFile(file))
+  if (!isConversionSupported(getFileExtension(file_name), to as string)) {
+    throw new Error(
+      `Conversion from ${getFileExtension(file_name)} to ${to} is not supported.`
+    )
+  }
 
-  // Prepare the FFmpeg command
-  const ffmpeg_cmd = getFFmpegCommand(input, output, to as string)
+  try {
+    // Write the input file to ffmpeg
+    await ffmpeg.writeFile(input, await fetchFile(file))
 
-  // Execute the command
-  await ffmpeg.exec(ffmpeg_cmd)
+    // Prepare the FFmpeg command
+    const ffmpeg_cmd = getFFmpegCommand(input, output, to as string)
 
-  // Read the output file
-  const data = (await ffmpeg.readFile(output)) as Uint8Array
-  const blob = new Blob([data], { type: file_type.split("/")[0] })
-  const url = URL.createObjectURL(blob)
+    // Execute the command
+    await ffmpeg.exec(ffmpeg_cmd)
 
-  return { url, output }
+    // Read the output file
+    const data = await ffmpeg.readFile(output)
+    const blob = new Blob([data], { type: `${file_type.split("/")[0]}/${to}` })
+    const url = URL.createObjectURL(blob)
+
+    // Clean up: remove input and output files
+    await ffmpeg.deleteFile(input)
+    await ffmpeg.deleteFile(output)
+
+    return { url, output }
+  } catch (error) {
+    console.error("Error in convert function:", error)
+    throw error
+  }
 }
