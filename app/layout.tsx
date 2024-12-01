@@ -1,19 +1,13 @@
-import type { Metadata } from "next"
-import { ThemeProvider } from "@/components/theme-provider"
-import localFont from "next/font/local"
-import "./globals.css"
-import { Toaster } from "../components/ui/toaster"
+import type { Metadata, Viewport } from "next"
+import { Outfit } from "next/font/google"
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-})
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-})
+import { ThemeProvider } from "@/components/theme-provider"
+
+import "./globals.css"
+
+import { Toaster } from "../components/ui/toaster"
+import { cn } from "../lib/utils"
+const outfit = Outfit({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Flux Lura - Your Unlimited Free File Converter",
@@ -22,6 +16,16 @@ export const metadata: Metadata = {
   creator: "Aayush Bharti",
   keywords:
     "image converter, video converter, audio converter, unlimited image converter, unlimited video converter, unlimited file conversion, multimedia transformation",
+    authors: [
+      {
+        name: "Aayush Bharti",
+        url: "https://aayushbharti.vercel.app",
+      },
+    ],
+}
+export const viewport: Viewport = {
+  colorScheme: "dark",
+  themeColor: [{ media: "(prefers-color-scheme: dark)", color: "black" }],
 }
 
 export default function RootLayout({
@@ -32,7 +36,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+       className={cn(
+        "relative h-full antialiased selection:bg-purple-600/20 selection:text-purple-400",
+        outfit.className
+      )}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Toaster />
