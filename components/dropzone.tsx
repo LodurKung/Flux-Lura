@@ -207,13 +207,13 @@ export default function EnhancedFileConverter() {
   }, [convertedFile, toast])
 
   return (
-    <Card className="max-w-xl mx-auto w-full">
+    <Card className="mx-auto w-full max-w-xl">
       <CardHeader></CardHeader>
       <CardContent className="w-full">
         {!file ? (
           <div
             {...getRootProps()}
-            className={`flex w-full flex-col items-center justify-center border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/65 p-10 transition-colors duration-200 ease-in-out ${
+            className={`flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 p-10 transition-colors duration-200 ease-in-out hover:bg-muted/65 ${
               isDragActive ? "border-primary/90" : "border-muted-foreground/25"
             }`}
           >
@@ -224,17 +224,17 @@ export default function EnhancedFileConverter() {
                 <p className="text-lg font-semibold">
                   Drag & drop a file here, or click to select a file
                 </p>
-                <p className="text-sm text-muted-foreground mt-2">
+                <p className="mt-2 text-sm text-muted-foreground">
                   Supported formats: Images, Audio, and Video
                 </p>
               </div>
             </div>
           </div>
         ) : (
-          <div className="space-y-4 w-full">
-            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+          <div className="w-full space-y-4">
+            <div className="flex items-center justify-between rounded-lg bg-muted p-4">
               <div className="flex items-center space-x-4">
-                <div className="p-2 bg-background rounded-full">
+                <div className="rounded-full bg-background p-2">
                   {fileToIcon(fileDetails?.file_type || "")}
                 </div>
                
@@ -298,7 +298,7 @@ export default function EnhancedFileConverter() {
                 (ext) => isConversionSupported(fileDetails.from, ext)
               ).length === 0 && (
                 <Card>
-                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTriangle className="size-4" />
                   <CardTitle>Conversion not supported</CardTitle>
                   <CardContent>
                     There are no supported conversion options for this file
@@ -310,7 +310,7 @@ export default function EnhancedFileConverter() {
         )}
       </CardContent>
       {file && (
-        <CardFooter className="flex justify-end space-x-4 w-full">
+        <CardFooter className="flex w-full justify-end space-x-4">
           {convertedFile && (
             <Button
               onClick={download}
@@ -335,7 +335,7 @@ export default function EnhancedFileConverter() {
             >
               {isConverting ? (
                 <>
-                  <Loader2 size={18} className="animate-spin mr-2" />
+                  <Loader2 size={18} className="mr-2 animate-spin" />
                   Converting...
                 </>
               ) : (

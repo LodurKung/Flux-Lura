@@ -43,7 +43,7 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Toaster />
-          <div className="max-w-4xl min-h-screen pt-28 lg:pt-32 2xl:pt-40 lg:max-w-6xl 2xl:max-w-7xl mx-auto">
+          <div className="mx-auto min-h-screen max-w-4xl pt-28 lg:max-w-6xl lg:pt-32 2xl:max-w-7xl 2xl:pt-40">
             {children}
           </div>
         </ThemeProvider>
